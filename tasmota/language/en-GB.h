@@ -666,6 +666,7 @@
 #define D_SENSOR_HRXL_RX       "HRXL Rx"
 #define D_SENSOR_ELECTRIQ_MOODL "MOODL Tx"
 #define D_SENSOR_AS3935         "AS3935"
+#define D_SENSOR_GP2Y10        "GP2Y10"
 
 // Units
 #define D_UNIT_AMPERE "A"
