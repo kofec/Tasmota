@@ -233,6 +233,7 @@ enum UserSelectablePins {
   GPIO_BOILER_OT_RX,   // OpenTherm Boiler RX pin
   GPIO_BOILER_OT_TX,   // OpenTherm Boiler TX pin
   GPIO_WINDMETER_SPEED,  // WindMeter speed counter pin
+  GPIO_GP2Y10,
   GPIO_SENSOR_END };
 
 // Programmer selectable GPIO functionality
@@ -323,6 +324,7 @@ const char kSensorNames[] PROGMEM =
   D_SENSOR_AS3935 "|" D_SENSOR_PMS5003_TX "|"
   D_SENSOR_BOILER_OT_RX "|" D_SENSOR_BOILER_OT_TX "|"
   D_SENSOR_WINDMETER_SPEED
+  D_SENSOR_GP2Y10 "|"
   ;
 
 const char kSensorNamesFixed[] PROGMEM =
@@ -664,6 +666,9 @@ const uint8_t kGpioNiceList[] PROGMEM = {
   GPIO_A4988_MS2,     // A4988 microstep pin2
   GPIO_A4988_MS3,     // A4988 microstep pin3
 #endif
+#ifdef USE_GP2Y10
+  GPIO_GP2Y10,
+#endif
 #ifdef USE_DEEPSLEEP
   GPIO_DEEPSLEEP,
 #endif
@@ -693,6 +698,7 @@ enum UserSelectableAdc0 {
   ADC0_CT_POWER,       // Current
 //  ADC0_SWITCH,         // Switch
 //  ADC0_SWITCH_INV,
+  ADC0_GP2Y10,         // Sharp GP2Y10XX Dust sensor
   ADC0_END };
 
 // Programmer selectable ADC0 functionality
@@ -709,6 +715,7 @@ const char kAdc0Names[] PROGMEM =
   D_RANGE "|"
   D_CT_POWER "|"
 //  D_SENSOR_SWITCH "|" D_SENSOR_SWITCH "i|"
+  D_SENSOR_GP2Y10 "|"
   ;
 
 /********************************************************************************************/

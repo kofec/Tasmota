@@ -690,6 +690,7 @@
 #define D_GPIO_WEBCAM_PSCLK    "CAM_PSCLK"
 #define D_GPIO_WEBCAM_HSD      "CAM_HSD"
 #define D_GPIO_WEBCAM_PSRCS    "CAM_PSRCS"
+#define D_SENSOR_GP2Y10        "GP2Y10"
 
 // Units
 #define D_UNIT_AMPERE "A"

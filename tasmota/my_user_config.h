@@ -705,6 +705,8 @@
   #define THERMOSTAT_TEMP_BAND_NO_PEAK_DET      1         // Default temperature band in thenths of degrees celsius within no peak will be detected
   #define THERMOSTAT_TIME_STD_DEV_PEAK_DET_OK   10        // Default standard deviation in minutes of the oscillation periods within the peak detection is successful
 
+//#define USE_GP2Y10				               // Add support for Sharp GP2Y10XX dust sensor (from sonoffSC)
+
 // -- End of general directives -------------------
 
 /*********************************************************************************************\
