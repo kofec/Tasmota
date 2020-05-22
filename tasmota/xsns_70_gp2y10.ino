@@ -1,5 +1,5 @@
 /*
-  xsns_66_GP2Y10.ino - ESP8266 GP2Y10 support for Sonoff-Tasmota
+  xsns_70_GP2Y10.ino - ESP8266 GP2Y10 support for Sonoff-Tasmota
 
   Copyright (C) 2019  Arnout Smeenge
 
@@ -22,22 +22,27 @@
  * GP2Y10 support
 \*********************************************************************************************/
 
-#define XSNS_66                       66
+#define XSNS_70                       70
 
 // Parameters for equation
-bool gpy_active = true;
-bool gpy_gpio_pin = false;
-int last_value = 0;
+
+struct GP2Y10 {
+   bool gpy_active = true;
+   bool gpy_gpio_pin = false;
+   int qual_last_value = 0;
+   int ACO_last_value = 0;
+   int AQI_value = 0;
+} Gp2y10;
 
 void GPYInit(void)
 {
-  if ((ADC0_GP2Y10 == my_adc0) && gpy_gpio_pin) {
+  if ((ADC0_GP2Y10 == my_adc0) && Gp2y10.gpy_gpio_pin) {
     Settings.adc_param_type = ADC0_GP2Y10;
-    pinMode(pin[GPIO_GP2Y10], OUTPUT);
-    digitalWrite(pin[GPIO_GP2Y10], HIGH);
+    pinMode(Pin(GPIO_GP2Y10), OUTPUT);
+    digitalWrite(Pin(GPIO_GP2Y10), HIGH);
   } else {
     //deactivate GPY
-    gpy_active = false;
+    Gp2y10.gpy_active = false;
   }
 }
 
@@ -45,7 +50,7 @@ bool GPYPinState()
 {
   if ((XdrvMailbox.index == GPIO_GP2Y10) && (ADC0_GP2Y10 == my_adc0)) {
     XdrvMailbox.index = GPIO_GP2Y10;
-    gpy_gpio_pin = true;
+    Gp2y10.gpy_gpio_pin = true;
     return true;
   }
   return false;
@@ -65,11 +70,12 @@ uint16_t GPYRead(uint8_t factor)
   for (x = 0; x < samples; x++)
   {
     noInterrupts();
-    digitalWrite(pin[GPIO_GP2Y10], LOW);
+    digitalWrite(Pin(GPIO_GP2Y10), LOW);
     delayMicroseconds(280);
-    analog += analogRead(A0);
+    Gp2y10.ACO_last_value = analogRead(A0);
+    analog += Gp2y10.ACO_last_value;
     delayMicroseconds(40);
-    digitalWrite(pin[GPIO_GP2Y10], HIGH);
+    digitalWrite(Pin(GPIO_GP2Y10), HIGH);
     interrupts();
     if (x < (samples - 1)) { delayMicroseconds(9680); }
 
@@ -77,11 +83,11 @@ uint16_t GPYRead(uint8_t factor)
 
 
   // exponential running average
-  int qual = ((analog*10000) >> (factor+10));
+//  int qual = ((analog*10000) >> (factor+10));
+    int qual = analog;
+  Gp2y10.qual_last_value = (0.05 * qual) + 0.95 * Gp2y10.qual_last_value;
 
-  last_value = (0.05 * qual) + 0.95 * last_value;
-
-  return last_value * 6 * 3 / 100; //Dust density sensing range 0 to 600 μg/m3
+  Gp2y10.AQI_value = Gp2y10.qual_last_value * 6 * 3 / 100; //Dust density sensing range 0 to 600 μg/m3
 }                            // AQI 3 * Dust
 
 #ifdef USE_RULES
@@ -99,16 +105,21 @@ void GPYEverySecond(void)
 /*********************************************************************************************\
  * Commands
 \*********************************************************************************************/
+#ifdef USE_WEBSERVER
+const char HTTP_SNS_GP2Y10[]    PROGMEM =
+  "{s}GP2Y10 "  D_ANALOG_INPUT      "{m}%d{e}"
+  "{s}GP2Y10 "  D_AIR_QUALITY       "{m}%d%%{e}";
+#endif  // USE_WEBSERVER
 
 void GPYShow(bool json)
 {
-  if (gpy_active) {
-      uint16_t gpy_quality = GPYRead(0);   //only one sample
+  if (Gp2y10.gpy_active) {
+      GPYRead(0);   //only one sample
         if (json) {
-          ResponseAppend_P(JSON_SNS_AIRQUALITY, D_SENSOR_GP2Y10, gpy_quality);
+          ResponseAppend_P(JSON_SNS_AIRQUALITY, D_SENSOR_GP2Y10, Gp2y10.qual_last_value);
     #ifdef USE_WEBSERVER
         } else {
-          WSContentSend_PD(HTTP_SNS_AIRQUALITY, D_SENSOR_GP2Y10, gpy_quality);
+          WSContentSend_PD(HTTP_SNS_GP2Y10, Gp2y10.ACO_last_value, Gp2y10.qual_last_value);
     #endif  // USE_WEBSERVER
         }
   }
@@ -118,11 +129,11 @@ void GPYShow(bool json)
  * Interface
 \*********************************************************************************************/
 
-bool Xsns66(uint8_t function)
+bool Xsns70(uint8_t function)
 {
   bool result = false;
 
-  if (gpy_active) {
+  if (Gp2y10.gpy_active) {
     switch (function) {
 #ifdef USE_RULES
       case FUNC_EVERY_250_MSECOND:
