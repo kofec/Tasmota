@@ -707,6 +707,8 @@
 
 //#define USE_GP2Y10				               // Add support for Sharp GP2Y10XX dust sensor (from sonoffSC)
 
+//#define USE_GP2Y10				               // Add support for Sharp GP2Y10XX dust sensor (from sonoffSC)
+
 // -- End of general directives -------------------
 
 /*********************************************************************************************\
